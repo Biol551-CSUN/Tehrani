@@ -1,0 +1,76 @@
+---
+title: "penguin plot Practice"
+author: "Helia Tehrani"
+date: "2023-03-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      Warning=FALSE,
+                      fig.path = "../Output/")
+
+```
+
+#Load Libraries
+
+```{r warning=FALSE}
+library(here)
+library(tidyverse)
+library(palmerpenguins)
+library(lubridate)
+library(kableExtra)
+library(palmerpenguins)
+library(tidyverse)
+library(memer)
+```
+
+#make a plot
+
+```{r penguin,out.width= "50%",fig.align='center',fig.cap="This is my penguin figure",dev='pdf'}
+penguins %>%
+  arrange(bill_length_mm)
+penguins %>%
+  arrange(-bill_length_mm)
+penguins2 <- penguins %>% arrange(-bill_length_mm)
+View(penguins2)
+```
+```{r}
+penguins %>% #using palmer dataset
+  ggplot(aes(x=bill_length_mm,
+             y=bill_depth_mm,
+             color=species))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(x="Bill Length (mm)",
+       Y="Bill Depth (mm)",
+       color="Species")+
+  theme_bw()
+```
+#Tables 
+
+#Tables 
+
+
+| Time  | Session | Topic    |
+|:------|:-------:|---------:|
+| _left_ | _center_| _right_ |
+| 01:00  | 2       | Species |
+| 01:50  |         | *Break* |
+| 02:00  | 3       | Tables  |
+| 02:45  |         | *Break* 
+
+#Add some style 
+```{r}
+penguins %>%
+  group_by(species) %>%
+  summarise(billmean = mean(bill_length_mm, na.rm = TRUE)) %>%
+  kbl() %>% # make it a kable table
+  kable_classic()%>%
+  row_spec(2, bold = T, color = "blue", background = "pink")
+```
+
+
+
+  

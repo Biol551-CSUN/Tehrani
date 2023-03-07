@@ -1,0 +1,20 @@
+---
+title: "Class practice / Markdown"
+author: "Helia Tehrani"
+date: "2023-02-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	Message = FALSE
+)
+## R Markdown
+
+library(tidyverse)
+library(beepr)
+beep(5)
+beep(9)
+
