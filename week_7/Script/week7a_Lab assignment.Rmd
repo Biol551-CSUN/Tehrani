@@ -1,0 +1,68 @@
+---
+title: "week7a-Lab-assignment"
+author: "Helia Tehrani"
+date: "2023-03-07"
+output:
+ prettydoc::html_pretty:
+    theme: cayman
+    highlight: github 
+---
+
+## R Markdown
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      Warning=FALSE,
+                      fig.path = "../Output/")
+```
+# Welcome
+My week_7a R markdown. In this file you will find
+
+- maps of Plastic pollution.
+
+# Load Libraries
+Loading libraries that I need to make my graph (map).
+```{r}
+knitr::opts_chunk$set(message = FALSE)
+library(here)
+library(tidyverse)
+library(palmerpenguins)
+library(lubridate)
+library(devtools)
+library(kableExtra)
+library(memer)
+library(maps)
+library(mapproj)
+library(mapdata)
+```
+readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-11/meteorites.csv")
+```{r Bring in Data}
+meteorites <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-11/meteorites.csv") %>% #read in data from Github
+  select(fall, year, lat, long) %>% #select columns 
+  filter(year > 1912, #filtered to get 100 years of data
+         fall == "Fell") #wanted meteorites that fell
+#Data from USA
+usa<-map_data("usa") #used usa map
+state <- map_data("state") #used states of usa map for map
+```
+# Map
+I created a map of the United States showing meteorites that have fallen there between 1913 and 2013 using the meteorite data. This is what I got, and I'm happy with it. I was trying to filter out longitude and latitude in the meteorite data to make my picture bigger, but I was having trouble.
+```{r Homework Map Lab 1, out.width="125%"}
+ggplot()+
+  geom_polygon(data = state, #used state to get state lines drawn on US
+               aes(x = long, 
+                   y = lat, 
+                   group = group,
+                   fill = region),  #used fill 
+               color = "blue")+
+   geom_point(data = meteorites, # add a point at all my sites 
+             aes(x = long, 
+                 y = lat))+
+    guides(fill=FALSE)+ #removed guide of states
+  coord_map(projection = "mercator",
+            xlim = c(-125, -20), #set longitude
+            ylim = c(25, 48))+ #set latitude
+  theme_void()+ #only show US, not gridlines
+  labs(title = "Sites of Fallen Meteorites in USA Over 100 Years (1913-2013)")
+```
