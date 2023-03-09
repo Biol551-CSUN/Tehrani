@@ -4,13 +4,17 @@
 ###################
 
 #Load Libraries 
-library(tidyverse)
+``{r}
+knitr::opts_chunk$set(message = FALSE)
 library(here)
-library(maps)
-library(mapdata)
-library(mapproj)
-library(ggplot2)
-
+library(tidyverse)
+library(palmerpenguins)
+library(lubridate)
+library(devtools)
+library(kableExtra)
+library(memer)
+library(fs)
+```
 
 ##Today's data
 # Read in data on population in California by county
