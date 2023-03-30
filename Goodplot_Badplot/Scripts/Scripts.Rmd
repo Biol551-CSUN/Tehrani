@@ -2,11 +2,10 @@
 title: "Goodplot_Badplot"
 author: "Helia Tehrani"
 date: "2023-03-30"
-output: 
-  html_document: 
-    theme: united 
-    toc: TRUE 
-    toc_float: TRUE
+output:
+ prettydoc::html_pretty:
+    theme: cayman
+    highlight: github 
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, 
@@ -14,15 +13,18 @@ knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE, 
                       fig.path="../Output/")
 ```
-##Bad Plot 
+
+## Bad Plot 
 For this plot, I will use the mtcars dataset that is included in R. My goal is to create a plot that is difficult to interpret and misleading.
+
 ## Load Libraries 
 ```{r}
 library(tidyverse)
 library(here)
 library(ggplot2)
 ```
-#Data
+
+## Data
 ```{r}
 ggplot(mtcars, aes(x = hp, y = mpg)) +
   geom_point(aes(size = qsec), color = "red", alpha = 0.5) +
@@ -47,4 +49,42 @@ ggplot(mtcars, aes(x = hp, y = mpg)) +
         panel.border = element_rect(size = 1, color = "black"),
         panel.background = element_rect(fill = "white"),
         plot.background = element_rect(fill = "gray95"))
+
+```
+
+## Discussion of Bad Plot
+
+*This plot violates several principles of data visualization, including*:
+
+1.	Misleading axis: The x-axis has no labels or tick marks, making it difficult to interpret the values being plotted. The y-axis is labeled in reverse order, with higher values at the bottom, which is counterintuitive.
+2.	Inappropriate use of size: The size of each point is based on the quarter mile time, which has no direct relationship to either horsepower or miles per gallon. Additionally, the size scale is labeled in subjective terms rather than objective units.
+3.	Unnecessary visual clutter: The red color and low transparency of the points make it difficult to see patterns in the data. The thick black lines around the plot and each panel add unnecessary visual clutter.
+
+## Good Plot
+Now I will create a good version of the same plot, using the same mtcars dataset.
+
+```{r}
+ggplot(mtcars, aes(x = mpg, y = hp)) +
+  geom_point(aes(size = qsec), color = "gray80", alpha = 0.8) +
+  labs(title = "Power vs. Mileage",
+       subtitle = "Size of points shows quarter mile time",
+       x = "Miles per Gallon",
+       y = "Horsepower",
+       size = "Quarter mile time") +
+  scale_size_continuous(range = c(1, 10),
+                         breaks = seq(14, 23, by = 2),
+                         labels = seq(14, 23, by = 2)) +
+  theme_bw() +
+  theme(panel.grid.major = element_line(color = "gray90"))
+
+```
+
+## Discussion of Good Plot
+The good plot addresses the issues of the bad plot and follows several principles of data visualization, including:
+
+1.	Clear axis labeling: Both the x-axis and y-axis are labeled clearly and use appropriate tick marks, making it easy to interpret the values being plotted.
+2.	Consistent visual encoding: The size of each point is now based on the quarter mile time, which is a reasonable proxy for car performance and is related to both horsepower and miles per gallon. The size scale is now labeled in objective units rather than subjective terms.
+3.	Simpler visual design: The points are now colored a light gray, making it easier to see patterns in the data. The thick black lines around the plot and each panel have been removed, reducing visual clutter. The alpha transparency of the points has also been increased to make overlapping points more visible.
+4.	Clear and concise plot title: The title of the plot now clearly states the variables being plotted, and the subtitle clarifies the meaning of the size of the points.
+Overall, the good plot is easy to read, visually appealing, and accurately conveys the relationships between the variables being plotted.
 

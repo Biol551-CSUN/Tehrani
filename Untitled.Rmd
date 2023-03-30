@@ -1,0 +1,13 @@
+---
+author: Helia
+date: '`r format(Sys.Date())`'
+title: Untitled
+subtitle: YAML Practice
+output:
+  html_document:
+    keep_md: 'False'
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
