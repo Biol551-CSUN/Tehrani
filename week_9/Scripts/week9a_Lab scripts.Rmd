@@ -1,0 +1,101 @@
+---
+title: "week9a_Lab"
+author: "Helia Tehrani"
+date: "2023-04-04"
+output:
+ prettydoc::html_pretty:
+    theme: cayman
+    highlight: github 
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.path = "../output/")
+```
+
+
+# Libraries
+```{r}
+# Loading libraries
+library(tidyverse)
+library(here)
+library(palmerpenguins)
+```
+### Data
+The palmerpenguins dataset will be used.
+```{r}
+glimpse(penguins)
+```
+** Function #1: Statistics when Grouped by 2 Variables
+
+This function allows you to generate a new dataframe using your data's summary statistics that only groups your data by two factors.
+*Caution: This function removes missing (NA) values.
+The result is a new dataframe that groups your desired variable by the two grouping variables and displays the count, average, variance, and standard deviation of the variable.
+
+```{r, df_stats2}
+df_stats2 <- function(data, gv1, gv2, x) { # specifies fxn name & args
+  
+  df <- data %>% 
+    
+  drop_na() %>% # drops NA values
+    
+  group_by({{gv1}},{{gv2}}) %>% # groups by 2 variables
+    
+  summarize(n = nrow({{x}}), # count
+            avg = mean({{x}}, na.rm = TRUE), # averages data
+            variance = var({{x}}, na.rm = TRUE), # calculates variance
+            std_dev = sd({{x}}, na.rm = TRUE)) # calculates standard deviation
+  
+  return(df) # returns dataframe
+    
+}
+```
+
+*Let's put our penguin data to the test:
+Summarizing statistics for flipper length are what I want to calculate after grouping by (1) species and (2) sex.
+
+```{r, include = TRUE}
+# Using our penguin data, create a new dataframe called "peng stats" using the df stats2 function.
+peng_stats <- df_stats2(data = penguins, gv1 = species, gv2 = sex, x = flipper_length_mm)
+glimpse(peng_stats)
+```
+
+### Task #2: Creating a Bar Plot
+
+```{r, barplot function}
+barplot <- function(data, x, y, fill, plot_title, x_axis, y_axis, legend_title){ # specifies names
+  
+  plot <- data %>% 
+    
+    # based on input, creates a plot and specifies variables.
+    ggplot(data, mapping = aes(x = {{x}}, 
+                               y = {{y}}, 
+                               fill = {{fill}}))+
+    
+    geom_bar(stat = "identity", position = "dodge")+ # specifies bar plot
+    
+    # specifies size & color of plot elements
+    theme(plot.title = element_text(size = 15, face = "bold"),
+          axis.title = element_text(size = 12, color = "blue"),
+          legend.title = element_text(size = 10, color = "green"),
+          panel.background = element_rect(fill = "lightcyan"))+
+    
+    # specifies plot labels based on input
+    labs(title = plot_title,
+         x = x_axis,
+         y = y_axis,
+         fill = legend_title)
+  
+  return(plot) # returns plot
+}
+```
+#now I try verify it using Function 1's peng stats data output. With the help of this function, I will plot the typical flipper length for each species and gender. The names of the plot, axes, and legend that I desire are also specified.
+```{r}
+# Uses barplot function to plot desired data
+barplot(data = peng_stats, x = species, y = avg, fill = sex, plot_title = "Average Flipper Length for Penguin Species", x_axis = "Species", y_axis = "Average Flipper Length (mm)", legend_title = "Sex")
+# saves plot to output folder
+ggsave(here("Week_9","output","TestPlotForFunction2.png"))
+```
+
+###### The End
