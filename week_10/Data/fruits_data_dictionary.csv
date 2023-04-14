@@ -1,0 +1,5 @@
+﻿Variable,Unit,Meaning
+fruit,N/A,common name of fruit
+inside_color,N/A,color of the inside of the fruit (not skin)
+size_cm,cm,size of the fruit in centimeters
+rating,N/A,"rating from 1-10 (1 = very bad, 10 = very good) given to fruit by fruit rater (single individual)"

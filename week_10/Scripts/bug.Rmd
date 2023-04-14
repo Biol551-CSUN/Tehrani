@@ -1,0 +1,48 @@
+---
+title: "Bug in coding"
+author: "Helia Tehrani"
+date: "2023-04-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Ten random numbers between 1 and 100 are generated using this function.
+
+set.seed(123) # Set seed for reproducibility
+random_nums <- runif(10, 1, 100) # Generate 10 random numbers between 1 and 100
+print(random_nums) # Print the random numbers
+```
+
+```{r, comment = ""}
+# This code contains a bug by setting upper bound of runif() function to be less than the lower bound.
+
+set.seed(123) # Set seed for reproducibility
+random_nums <- runif(10, 1, 0) # Generate 10 random numbers between 1 and 0
+print(random_nums) # Print the random numbers
+```
+
+To make this code reproducible, we can use `datapasta` and `reprex` packages. Here's how:
+
+```{r, comment = "", include = FALSE}
+# Install and load the necessary packages
+if(!require(datapasta)) install.packages("datapasta")
+if(!require(reprex)) install.packages("reprex")
+library(datapasta)
+library(reprex)
+```
+```{r, comment = ""}
+# This code contains a bug by setting upper bound of runif() function to be less than the lower bound.
+
+set.seed(123) # Set seed for reproducibility
+random_nums <- runif(10, 1, 0) # Generate 10 random numbers between 1 and 0
+print(random_nums) # Print the random numbers
+```
+
+```{r, comment = "", include = FALSE}
+# Use reprex to test the code
+reprex::reprex(si = TRUE, show = TRUE)
+```
