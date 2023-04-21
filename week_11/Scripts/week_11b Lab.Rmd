@@ -1,0 +1,67 @@
+---
+title: "week_11b Lab assignment"
+author: "Helia Tehrani"
+date: "2023-04-21"
+output:
+ prettydoc::html_pretty:
+    theme: cayman
+    highlight: github 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.path = "../output/")
+```
+
+##Intro
+_Today I will need to use skills that I have learned in working with words to clean up some issues with the character data and use what I learned today to reorder my factors into orders that make sense. 
+
+## Load libraries 
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggplot2)
+```
+
+## Load data 
+```{r}
+intertidal <- read_csv(here("week_11", "Data", "intertidaldata.csv"))
+```
+
+# Clean and organize the data
+```{r}
+intertidal_clean <- intertidal %>%
+  clean_names() %>% # Renames the columns to make them easier to read
+  mutate(quadrat=str_replace_all(quadrat, pattern="[0-9]|\\W|\\.", replacement= "")) %>% # Replaces certain characters and numbers in quadrat column with nothing
+  mutate(quadrat=factor(quadrat, levels=c("Low", "Mid", "High"))) %>% # Converts quadrat column into a factor and sets the levels as "Low", "Mid", and "High"
+  select(c("site", "transect", "quadrat", "algae")) # Selects only the relevant columns
+intertidal_pivot <- intertidal_clean %>%
+  pivot_longer(col=algae,
+               names_to = "organism",
+               values_to = "algal_cover") %>% # Convert the algae column into a long format with the organism and algal_cover columns
+  group_by(quadrat) %>%
+  summarize(total_count = sum(algal_cover)) # Groups the data by quadrat and sums up the algal cover for each quadrat
+```
+# Display Data 
+
+```{r, intertidal}
+ggplot(data=intertidal_pivot,
+       aes(x=quadrat, fct_infreq(quadrat),
+           y=total_count,
+           fill=quadrat)) +
+  geom_col(color="black") + #add color
+  scale_fill_manual(values=rainbow(3)) +
+  labs(x="Tidal Region",
+       y="Total Algae Count",
+       title="Distribution of Algae Counts Across Transects") + #name the title
+  theme_light() + #my favorite theme
+  theme(plot.title=element_text(hjust=0.5, color="cornflowerblue"),
+        axis.text=element_text(size=10),
+        legend.position="bottom",
+        legend.title=element_blank(),
+        legend.text=element_text(size=9, color="gray10"))
+```
+

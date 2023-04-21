@@ -1,0 +1,148 @@
+---
+title: "Working with factors"
+author: "Helia Tehrani"
+date: "2023-04-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+### Factors
+```{r}
+# Load your libraries
+library(tidyverse)
+library(here)
+```
+## What is a Factor?
+- A factor is a specialized version of a character. It is how we truly store categorical data. The values that a factor takes are called levels. These levels allow you to order your data in specific ways. The default levels are always alphabetical. So, we need to learn how to use factors appropriately and reorder them to be specific to our analyses.
+```{r}
+factor()
+fruits<-factor(c("Apple", "Grape", "Banana"))
+fruits
+```
+##Factor Booby-Traps!
+```{r}
+test<-c("A", "1", "2")
+as.numeric(test)
+```
+```{r}
+#Let's test was a factor
+test<-factor(test) 
+as.numeric(test)
+```
+## Reading in data safely
+```{r}
+glimpse(starwars)
+```
+## Starwars
+```{r}
+starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  count(species, sort = TRUE)
+```
+```{r}
+star_counts<-starwars %>%
+  filter(!is.na(species)) %>%
+  mutate(species = fct_lump(species, n = 3)) %>%
+  count(species)
+star_counts
+```
+### Rendering Factors
+```{r}
+star_counts %>%
+  ggplot(aes(x = species, y = n))+
+  geom_col()
+```
+Ascending Order
+```{r}
+star_counts %>% 
+  ggplot(aes(x = fct_reorder(species, n), y = n))+ # reorder the factor of species by n
+  geom_col()
+```
+Descending Order
+```{r}
+star_counts %>%
+  ggplot(aes(x = fct_reorder(species, n, .desc = TRUE), y = n))+ # reorder the factor of species by n
+  geom_col() +
+  labs(x = "Species")
+```
+## Reordering Line Plots
+```{r}
+total_income<-income_mean %>%
+  group_by(year, income_quintile)%>%
+  summarise(income_dollars_sum = sum(income_dollars))%>%
+  mutate(income_quintile = factor(income_quintile)) 
+```
+
+### Basic Line Plot
+```{r}
+total_income%>%
+ggplot(aes(x = year, y = income_dollars_sum, color = income_quintile))+
+  geom_line()
+```
+
+```{r}
+total_income%>%
+  ggplot(aes(x = year, y = income_dollars_sum, 
+             color = fct_reorder2(income_quintile,year,income_dollars_sum)))+
+  geom_line()+
+  labs(color = "income quantile")
+```
+
+### Reorder Levels Directly Into in a Vector 
+
+```{r}
+x1 <- factor(c("Jan", "Mar", "Apr", "Dec"))
+x1
+```
+
+This order is probably not what we want... You can set the specific order of the levels
+
+```{r}
+x1 <- factor(c("Jan", "Mar", "Apr", "Dec"), levels = c("Jan", "Mar", "Apr", "Dec"))
+x1
+```
+### Subset Data with Factors
+-Back to starwars. Let's say we instead of grouping our species that have < 3 counts into "Other" we just filter them out.
+
+```{r}
+starwars_clean<-starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  count(species, sort = TRUE) %>%
+  mutate(species = factor(species)) %>% # make species a factor
+  filter(n>3) # only keep species that have more than 3
+starwars_clean
+```
+
+#Check the levels of the factor - SHOWS ALL OF THEM 
+```{r}
+levels(starwars_clean$species)
+```
+
+### DROP THE EXTRA LEVELS
+
+```{r}
+starwars_clean<-starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  count(species, sort = TRUE) %>%
+  mutate(species = factor(species)) %>% # make species a factor 
+  filter(n>3)  %>% # only keep species that have more than 3 
+  droplevels() # drop extra levels
+levels(starwars_clean$species)
+```
+
+### Recode Levels
+- If you want to rename (or recode) a level. For example, lets recode Human to Humanoid.
+```{r}
+starwars_clean<-starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  count(species, sort = TRUE) %>%
+  mutate(species = factor(species)) %>% # make species a factor 
+  filter(n>3)  %>% # only keep species that have more than 3 
+  droplevels() %>% # drop extra levels 
+  mutate(species = fct_recode(species, "Humanoid" = "Human")) # new name = old name 
+starwars_clean
+```
