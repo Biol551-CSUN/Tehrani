@@ -1,0 +1,69 @@
+---
+title: "week_12a Lab Hw"
+author: "Helia Tehrani"
+date: "2023-04-26"
+output:
+ prettydoc::html_pretty:
+    theme: cayman
+    highlight: github 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.path = "../Output/")
+```
+
+##Lab intro
+The goal of this lab is to bring in all 4 files and determine the average and standard deviation of temperature (Temp.C) and light intensity (Intensity.lux) for each tidal pool.
+
+##load necessary libraries
+```{r}
+library(tidyverse)
+library(here)
+```
+
+# Point to the directory of interest
+```{r}
+hwPath <- here("Week_12", "Data", "homework")
+files <- dir(path = hwPath, pattern = ".csv")
+files
+# Define an empty dataframe with 5 columns to hold data
+homework <- data.frame(matrix(nrow = length(files), ncol = 5))
+colnames(homework) <- c("filename", "mean_temp", "stdev_temp", "mean_light", "stdev_light")
+homework
+# Read in data from files using a for loop
+
+for (i in 1:length(files)) {
+ raw_data <- read_csv(paste0(hwPath, "/", files[i]))
+ homework$filename[i] <- files[i]
+ homework$mean_temp[i] <- mean(raw_data$Temp.C, na.rm =TRUE)
+ homework$stdev_temp[i] <- sd(raw_data$Temp.C, na.rm =TRUE)
+ homework$mean_light[i] <- mean(raw_data$Intensity.lux, na.rm =TRUE)
+ homework$stdev_light[i] <- sd(raw_data$Intensity.lux, na.rm =TRUE)
+}
+homework
+
+```
+# Use the map function to read in files and conduct data analysis while retaining the filename as a column
+```{r}
+hwPath<-here("Week_12", "Data", "homework") #First point to the folder's location in the computer
+files <- dir(path = hwPath,pattern = ".csv", full.names = TRUE) #must be set to full.R will search in the correct folder while looking for file names if names = TRUE.
+files
+```
+```{r}
+#After that, read in the files via a map rather than a for loop, keeping the filename as a column.
+hw_map_data <- files %>%
+ set_names() %>% ## sets the file name to the id of each list.
+map_df(read_csv,.id = "filename") %>% 
+    group_by(filename) %>%      
+   summarise(mean_temp = mean(Temp.C, na.rm = TRUE),
+                    stdev_temp = sd(Temp.C, na.rm = TRUE),
+                    mean_light = mean(Intensity.lux, na.rm = TRUE),
+                    stdev_light = sd(Intensity.lux, na.rm = TRUE)) %>%
+ mutate(filename = str_trim(str_extract_all(filename, "[T][P][1-9]{1,4}")))
+
+hw_map_data
+```
+#The end 
