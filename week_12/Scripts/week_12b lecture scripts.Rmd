@@ -1,0 +1,129 @@
+---
+title: "Intro to basic linear modeling"
+author: "Helia Tehrani"
+date: "2023-04-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.path = "../Output/")
+```
+
+##Intro to basic linear modeling
+
+#loading libraries
+```{r}
+library(tidyverse)
+library(here)
+library(palmerpenguins)
+library(broom)
+library(performance) 
+library(modelsummary)
+library(tidymodels)
+```
+
+Model the penguin dataset.
+
+We've tidied and visualized the data and have our set of hypotheses that we want to test. Now we can start modeling...
+
+# Anatomy of a Basic Linear Model
+To run a simple linear model you use the following formula:
+
+mod<-lm(y~x, data = df)
+
+lm = linear model, y = dependent variable, x = independent variable(s), df = dataframe.
+
+You read this as y is a function of x
+
+Multiple regression
+mod<-lm(y~x1 + x2, data = df)
+
+## Model the Penguin Dataset
+```{r}
+Peng_mod<-lm(bill_length_mm ~ bill_depth_mm*species, data = penguins)
+```
+
+```{r}
+check_model(Peng_mod) 
+```
+
+## View results in base R
+```{r}
+anova(Peng_mod)
+```
+
+## View results with broom
+```{r}
+coeffs<-tidy(Peng_mod) # just put tidy() around it
+coeffs # Tidy coefficients
+```
+```{r}
+results<-glance(Peng_mod) 
+results# tidy r2, etc
+```
+
+-augment Your original data should be supplemented with residuals and anticipated values, and the model and data must be placed together.
+```{r}
+resid_fitted<-augment(Peng_mod)
+resid_fitted 
+```
+
+## Results in Model Summary
+```{r}
+Peng_mod_noX<-lm(bill_length_mm ~ bill_depth_mm, data = penguins) # NEW MODEL
+models<-list("Model with interaction" = Peng_mod, # make a list of models and name them
+             "Model with no interaction" = Peng_mod_noX)
+modelsummary(models, output = here("Week_12","output","table.docx")) 
+```
+
+```{r}
+modelplot(models) +
+    labs(x = 'Coefficients', 
+         y = 'Term names') +
+    scale_color_manual(values = wes_palette('Darjeeling1'))
+```
+
+## Many Models with purrr, dplyr, and broom
+```{r}
+ models<- penguins %>%
+  ungroup() %>% # the penguin data are grouped so we need to ungroup them
+  nest(-species) %>% # nest all the data by species
+  mutate(fit = map(data, ~lm(bill_length_mm~body_mass_g, data = .)))
+# . = take this data set
+models
+models$fit
+``` 
+ 
+ 
+```{r}
+ results<-models %>%
+   mutate(coeffs = map(fit, tidy), # look at the coefficients
+   modelresults = map(fit, glance)) %>%  # R2 and others
+   select(species, coeffs, modelresults) %>% # only keep the results
+   unnest() # put it back in a dataframe and specify which columns to unnest
+results
+```
+## Tidymodels
+```{r}
+lm_mod <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(bill_length_mm ~ bill_depth_mm*species, data = penguins) %>%
+  tidy()
+lm_mod
+```
+### Pipe to a plot
+```{r}
+lm_mod<-linear_reg() %>%
+  set_engine("lm") %>%
+  fit(bill_length_mm ~ bill_depth_mm*species, data = penguins) %>%
+  tidy() %>%
+  ggplot()+
+    geom_point(aes(x = term, y = estimate))+
+    geom_errorbar(aes(x = term, ymin = estimate-std.error,
+                      ymax = estimate+std.error), width = 0.1 )+
+  coord_flip()
+lm_mod
+```
